@@ -1,9 +1,8 @@
--- 1. ATTENTE DU CHARGEMENT
+-- 1. INITIALISATION
 local player = game:GetService("Players").LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 
--- Nettoyage si déjà présent
 if playerGui:FindFirstChild("AppleGui") then
     playerGui.AppleGui:Destroy()
 end
@@ -27,154 +26,138 @@ local autoFarmActive = false
 local antiAfkActive = false
 local currentTPIndex = 1
 
--- 3. LOGIQUE ANTI-AFK
-local vu = game:GetService("VirtualUser")
-player.Idled:Connect(function()
-    if antiAfkActive then
-        pcall(function()
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
-        end)
-    end
-end)
-
--- 4. CRÉATION DE L'INTERFACE
+-- 3. INTERFACE
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AppleGui"
-screenGui.DisplayOrder = 999
+screenGui.DisplayOrder = 5 -- Priorité moyenne pour ne pas tout cacher
+screenGui.IgnoreGuiInset = true -- Optionnel, selon ton exécuteur
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Logo pour ouvrir
+-- Logo discret (réduit à 40x40)
 local logo = Instance.new("TextButton")
 logo.Name = "OpenLogo"
-logo.Size = UDim2.new(0, 50, 0, 50)
-logo.Position = UDim2.new(0, 20, 0, 20)
+logo.Size = UDim2.new(0, 40, 0, 40)
+logo.Position = UDim2.new(0, 10, 0, 150) -- Déplacé un peu plus bas pour ne pas gêner le chat
 logo.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 logo.Text = "🍎"
-logo.TextSize = 30
+logo.TextSize = 20
 logo.Parent = screenGui
-Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 10)
 
--- Fenêtre principale
+-- Fenêtre
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 320, 0, 180)
-frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+frame.Size = UDim2.new(0, 300, 0, 160)
+frame.Position = UDim2.new(0.5, -150, 0.5, -80)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 frame.Parent = screenGui
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
--- Header (Zone pour bouger la fenêtre)
+-- Header (Zone de Drag)
 local header = Instance.new("Frame")
-header.Name = "Header"
 header.Size = UDim2.new(1, 0, 0, 35)
 header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 header.Parent = frame
-Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+local hCorner = Instance.new("UICorner", header)
+hCorner.CornerRadius = UDim.new(0, 10)
 
--- Titre et Crédits
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0.5, 0, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.Text = "Apple Incremental"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextSize = 13
 title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
 local credit = Instance.new("TextLabel")
-credit.Size = UDim2.new(0, 100, 1, 0)
-credit.Position = UDim2.new(1, -140, 0, 0)
+credit.Size = UDim2.new(0, 90, 1, 0)
+credit.Position = UDim2.new(1, -125, 0, 0)
 credit.Text = "Made By SooN"
 credit.TextColor3 = Color3.fromRGB(180, 180, 180)
 credit.Font = Enum.Font.Gotham
-credit.TextSize = 11
-credit.TextXAlignment = Enum.TextXAlignment.Right
+credit.TextSize = 10
 credit.BackgroundTransparency = 1
+credit.TextXAlignment = Enum.TextXAlignment.Right
 credit.Parent = header
 
 local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 25, 0, 25)
-close.Position = UDim2.new(1, -30, 0, 5)
+close.Size = UDim2.new(0, 24, 0, 24)
+close.Position = UDim2.new(1, -28, 0, 5)
 close.Text = "X"
-close.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+close.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 close.TextColor3 = Color3.new(1, 1, 1)
 close.Parent = header
 Instance.new("UICorner", close)
 
--- Boutons Contenu (Auto Farm / Anti AFK)
-local function createToggleButton(name, pos, labelText)
+-- Fonction création boutons
+local function addToggle(posY, txt)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0, 100, 0, 30)
-    label.Position = UDim2.new(0, 20, 0, pos)
-    label.Text = labelText
+    label.Position = UDim2.new(0, 20, 0, posY)
+    label.Text = txt
     label.TextColor3 = Color3.new(1, 1, 1)
     label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
 
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 70, 0, 30)
-    btn.Position = UDim2.new(1, -90, 0, pos)
+    btn.Size = UDim2.new(0, 60, 0, 26)
+    btn.Position = UDim2.new(1, -80, 0, posY + 2)
     btn.Text = "OFF"
-    btn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Parent = frame
     Instance.new("UICorner", btn)
     return btn
 end
 
-local toggleAF = createToggleButton("AF", 60, "Auto Farm")
-local toggleAA = createToggleButton("AA", 105, "Anti AFK")
+local btnAF = addToggle(55, "Auto Farm")
+local btnAA = addToggle(95, "Anti AFK")
 
--- 5. SYSTÈME DE DRAG (POUR BOUGER LE UI)
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
+-- 4. LOGIQUE DRAG
+local dragging, dragStart, startPos
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = frame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
     end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
     end
 end)
 
--- 6. LOGIQUE FINALE
+-- 5. FONCTIONS
 logo.MouseButton1Click:Connect(function() frame.Visible = not frame.Visible end)
 close.MouseButton1Click:Connect(function() frame.Visible = false end)
 
-toggleAF.MouseButton1Click:Connect(function()
+btnAF.MouseButton1Click:Connect(function()
     autoFarmActive = not autoFarmActive
-    toggleAF.Text = autoFarmActive and "ON" or "OFF"
-    toggleAF.BackgroundColor3 = autoFarmActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    btnAF.Text = autoFarmActive and "ON" or "OFF"
+    btnAF.BackgroundColor3 = autoFarmActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(100, 100, 100)
 end)
 
-toggleAA.MouseButton1Click:Connect(function()
+btnAA.MouseButton1Click:Connect(function()
     antiAfkActive = not antiAfkActive
-    toggleAA.Text = antiAfkActive and "ON" or "OFF"
-    toggleAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    btnAA.Text = antiAfkActive and "ON" or "OFF"
+    btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(100, 100, 100)
 end)
 
+-- Boucle TP
 task.spawn(function()
     while true do
         if autoFarmActive then
@@ -188,5 +171,13 @@ task.spawn(function()
         else
             task.wait(0.5)
         end
+    end
+end)
+
+-- Anti-AFK
+local vu = game:GetService("VirtualUser")
+player.Idled:Connect(function()
+    if antiAfkActive then
+        pcall(function() vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame) task.wait(1) vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end)
     end
 end)
