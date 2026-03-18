@@ -29,98 +29,110 @@ local currentTPIndex = 1
 -- 3. INTERFACE
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AppleGui"
-screenGui.DisplayOrder = 5 -- Priorité moyenne pour ne pas tout cacher
-screenGui.IgnoreGuiInset = true -- Optionnel, selon ton exécuteur
+screenGui.DisplayOrder = 5
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Logo discret (réduit à 40x40)
+-- Logo AGRANDI (60x60)
 local logo = Instance.new("TextButton")
 logo.Name = "OpenLogo"
-logo.Size = UDim2.new(0, 40, 0, 40)
-logo.Position = UDim2.new(0, 10, 0, 150) -- Déplacé un peu plus bas pour ne pas gêner le chat
+logo.Size = UDim2.new(0, 60, 0, 60)
+logo.Position = UDim2.new(0, 15, 0, 150)
 logo.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 logo.Text = "🍎"
-logo.TextSize = 20
+logo.TextSize = 35 -- Icône plus grande
 logo.Parent = screenGui
-Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
--- Fenêtre
+-- Fenêtre principale AGRANDIE (350x220)
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 300, 0, 160)
-frame.Position = UDim2.new(0.5, -150, 0.5, -80)
+frame.Size = UDim2.new(0, 350, 0, 220)
+frame.Position = UDim2.new(0.5, -175, 0.5, -110)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
 -- Header (Zone de Drag)
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 35)
+header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 header.Parent = frame
 local hCorner = Instance.new("UICorner", header)
-hCorner.CornerRadius = UDim.new(0, 10)
+hCorner.CornerRadius = UDim.new(0, 12)
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0.5, 0, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
+title.Position = UDim2.new(0, 15, 0, 0)
 title.Text = "Apple Incremental"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 13
+title.TextSize = 15
 title.BackgroundTransparency = 1
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
 local credit = Instance.new("TextLabel")
-credit.Size = UDim2.new(0, 90, 1, 0)
-credit.Position = UDim2.new(1, -125, 0, 0)
-credit.Text = "Made By SooN"
-credit.TextColor3 = Color3.fromRGB(180, 180, 180)
+credit.Size = UDim2.new(0, 110, 1, 0)
+credit.Position = UDim2.new(1, -145, 0, 0)
+credit.Text = "Made By RoScript" -- Modifié ici
+credit.TextColor3 = Color3.fromRGB(200, 200, 200)
 credit.Font = Enum.Font.Gotham
-credit.TextSize = 10
+credit.TextSize = 11
 credit.BackgroundTransparency = 1
 credit.TextXAlignment = Enum.TextXAlignment.Right
 credit.Parent = header
 
 local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 24, 0, 24)
-close.Position = UDim2.new(1, -28, 0, 5)
+close.Size = UDim2.new(0, 28, 0, 28)
+close.Position = UDim2.new(1, -34, 0, 6)
 close.Text = "X"
 close.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 close.TextColor3 = Color3.new(1, 1, 1)
 close.Parent = header
 Instance.new("UICorner", close)
 
--- Fonction création boutons
+-- Version V1 en bas à droite
+local version = Instance.new("TextLabel")
+version.Size = UDim2.new(0, 40, 0, 20)
+version.Position = UDim2.new(1, -50, 1, -25)
+version.Text = "V1" -- Ajouté ici
+version.TextColor3 = Color3.fromRGB(100, 100, 100)
+version.Font = Enum.Font.Gotham
+version.TextSize = 12
+version.BackgroundTransparency = 1
+version.TextXAlignment = Enum.TextXAlignment.Right
+version.Parent = frame
+
+-- Fonction création boutons ajustée
 local function addToggle(posY, txt)
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 100, 0, 30)
-    label.Position = UDim2.new(0, 20, 0, posY)
+    label.Size = UDim2.new(0, 120, 0, 35)
+    label.Position = UDim2.new(0, 25, 0, posY)
     label.Text = txt
     label.TextColor3 = Color3.new(1, 1, 1)
     label.BackgroundTransparency = 1
     label.Font = Enum.Font.Gotham
+    label.TextSize = 14
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
 
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 60, 0, 26)
-    btn.Position = UDim2.new(1, -80, 0, posY + 2)
+    btn.Size = UDim2.new(0, 75, 0, 30)
+    btn.Position = UDim2.new(1, -100, 0, posY + 2)
     btn.Text = "OFF"
-    btn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Parent = frame
     Instance.new("UICorner", btn)
     return btn
 end
 
-local btnAF = addToggle(55, "Auto Farm")
-local btnAA = addToggle(95, "Anti AFK")
+local btnAF = addToggle(65, "Auto Farm")
+local btnAA = addToggle(115, "Anti AFK")
 
--- 4. LOGIQUE DRAG
+-- 4. LOGIQUE DRAG (Fluide)
 local dragging, dragStart, startPos
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -141,23 +153,22 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- 5. FONCTIONS
+-- 5. FONCTIONS ET BOUCLES
 logo.MouseButton1Click:Connect(function() frame.Visible = not frame.Visible end)
 close.MouseButton1Click:Connect(function() frame.Visible = false end)
 
 btnAF.MouseButton1Click:Connect(function()
     autoFarmActive = not autoFarmActive
     btnAF.Text = autoFarmActive and "ON" or "OFF"
-    btnAF.BackgroundColor3 = autoFarmActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(100, 100, 100)
+    btnAF.BackgroundColor3 = autoFarmActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(80, 80, 80)
 end)
 
 btnAA.MouseButton1Click:Connect(function()
     antiAfkActive = not antiAfkActive
     btnAA.Text = antiAfkActive and "ON" or "OFF"
-    btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(100, 100, 100)
+    btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(80, 80, 80)
 end)
 
--- Boucle TP
 task.spawn(function()
     while true do
         if autoFarmActive then
@@ -174,10 +185,13 @@ task.spawn(function()
     end
 end)
 
--- Anti-AFK
 local vu = game:GetService("VirtualUser")
 player.Idled:Connect(function()
     if antiAfkActive then
-        pcall(function() vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame) task.wait(1) vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end)
+        pcall(function() 
+            vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame) 
+            task.wait(1) 
+            vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) 
+        end)
     end
 end)
