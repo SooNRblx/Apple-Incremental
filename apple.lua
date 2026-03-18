@@ -4,7 +4,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
--- Nettoyage des anciennes versions
+-- Nettoyage
 if playerGui:FindFirstChild("AppleAutoFarmGui") then
     playerGui.AppleAutoFarmGui:Destroy()
 end
@@ -48,13 +48,14 @@ Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
 -- Fenêtre principale
 local frame = Instance.new("Frame", screenGui)
+frame.Name = "MainFrame"
 frame.Size = UDim2.new(0, 350, 0, 280)
 frame.Position = UDim2.new(0.5, -175, 0.5, -140)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
--- Header (Drag)
+-- Header
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -70,7 +71,6 @@ title.TextSize = 14
 title.BackgroundTransparency = 1
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Made By RoScript (Haut Droite)
 local headerCredit = Instance.new("TextLabel", header)
 headerCredit.Size = UDim2.new(0, 100, 1, 0)
 headerCredit.Position = UDim2.new(1, -140, 0, 0)
@@ -102,7 +102,7 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTION FARM ---
+--- SECTIONS (Farm, Movement, AFK) ---
 local farmSection = Instance.new("Frame", scroll)
 farmSection.Size = UDim2.new(0, 310, 0, 80)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -126,13 +126,11 @@ btnAF.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAF.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAF)
 
---- SECTION MOVEMENT ---
 local moveSection = Instance.new("Frame", scroll)
 moveSection.Size = UDim2.new(0, 310, 0, 160)
 moveSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", moveSection)
 
--- Sliders (WS & JP)
 local labelWS = Instance.new("TextLabel", moveSection)
 labelWS.Size = UDim2.new(0, 200, 0, 20)
 labelWS.Position = UDim2.new(0, 10, 0, 20)
@@ -171,7 +169,6 @@ dotJP.Position = UDim2.new(0, 0, 0.5, -10)
 dotJP.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
 Instance.new("UICorner", dotJP).CornerRadius = UDim.new(1, 0)
 
---- SECTION ANTI-AFK ---
 local afkSection = Instance.new("Frame", scroll)
 afkSection.Size = UDim2.new(0, 310, 0, 60)
 afkSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -194,7 +191,7 @@ btnAA.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAA.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAA)
 
--- Bas de l'UI : v1 (More soon) (Bas Droite)
+-- Version Footer
 local footerVersion = Instance.new("TextLabel", frame)
 footerVersion.Size = UDim2.new(0, 120, 0, 20)
 footerVersion.Position = UDim2.new(1, -130, 1, -25)
@@ -205,20 +202,21 @@ footerVersion.Font = Enum.Font.Gotham
 footerVersion.TextSize = 11
 footerVersion.TextXAlignment = Enum.TextXAlignment.Right
 
--- 4. LOGIQUE DE DRAG
-local function makeDraggable(obj)
+-- 4. LOGIQUE DE DRAG AMÉLIORÉE (Logo + Fenêtre Entière)
+local function makeDraggable(obj, target)
+    target = target or obj
     local dragging, dragStart, startPos
     obj.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = obj.Position
+            startPos = target.Position
         end
     end)
     obj.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
-            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     obj.InputEnded:Connect(function(input)
@@ -228,8 +226,11 @@ local function makeDraggable(obj)
     end)
 end
 
+-- On rend le logo déplaçable
 makeDraggable(logo)
-makeDraggable(header)
+-- On rend TOUTE LA FENÊTRE déplaçable en cliquant sur le fond (Frame) ou sur le Header
+makeDraggable(frame)
+makeDraggable(header, frame)
 
 -- 5. LOGIQUE DES SLIDERS
 local function setupSlider(back, dot, min, max, callback)
@@ -259,7 +260,7 @@ end
 setupSlider(sliderWS, dotWS, 16, 250, function(v) walkSpeedValue = v labelWS.Text = "WalkSpeed: "..v end)
 setupSlider(sliderJP, dotJP, 50, 350, function(v) jumpPowerValue = v labelJP.Text = "JumpPower: "..v end)
 
--- 6. CYCLES ET BOUTONS
+-- 6. FONCTIONS ET CYCLES
 local lastLogoPos = logo.Position
 logo.MouseButton1Up:Connect(function()
     if (logo.Position.X.Offset - lastLogoPos.X.Offset) == 0 then
@@ -298,7 +299,7 @@ task.spawn(function()
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(locations[currentTPIndex])
                 currentTPIndex = (currentTPIndex % #locations) + 1
             end)
-            task.wait(0.1)
+            task.wait(0.01)
         else task.wait(0.5) end
     end
 end)
@@ -306,9 +307,6 @@ end)
 local vu = game:GetService("VirtualUser")
 player.Idled:Connect(function()
     if antiAfkActive then
-        pcall(function()
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
-        end)
+        pcall(function() vu:CaptureController() vu:ClickButton2(Vector2.new()) end)
     end
 end)
