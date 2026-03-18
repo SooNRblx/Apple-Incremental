@@ -299,7 +299,7 @@ task.spawn(function()
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(locations[currentTPIndex])
                 currentTPIndex = (currentTPIndex % #locations) + 1
             end)
-            task.wait(0.1)
+            task.wait(0.001)
         else task.wait(0.1) end
     end
 end)
