@@ -16,17 +16,6 @@ local currentTPIndex = 1
 local walkSpeedValue = 16
 local jumpPowerValue = 50
 local farmWaitTime = 1.0
-local appleHistory = {}
-
--- FONCTION DE RÉCUPÉRATION (Ciblée sur ton script)
-local function getAppleValue()
-    -- On pointe directement sur l'emplacement que tu as trouvé
-    local events = player:FindFirstChild("Events")
-    if events then
-        return events:FindFirstChild("AppleCollects")
-    end
-    return nil
-end
 
 local locations = {
     Vector3.new(16.294, 2, 8.095), Vector3.new(26.887, 2, 32.912), Vector3.new(28.422, 2, 6.238),
@@ -56,8 +45,8 @@ logo.TextSize = 35
 Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 350, 0, 330)
-frame.Position = UDim2.new(0.5, -175, 0.5, -165)
+frame.Size = UDim2.new(0, 350, 0, 280)
+frame.Position = UDim2.new(0.5, -175, 0.5, -140)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
@@ -101,70 +90,14 @@ scroll.Size = UDim2.new(1, -10, 1, -85)
 scroll.Position = UDim2.new(0, 5, 0, 45)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
-scroll.CanvasSize = UDim2.new(0, 0, 0, 520)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 450)
 scroll.ScrollBarThickness = 2
 
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTION STATS ---
-local statsSection = Instance.new("Frame", scroll)
-statsSection.Size = UDim2.new(0, 310, 0, 50)
-statsSection.BackgroundColor3 = Color3.fromRGB(45, 45, 20)
-Instance.new("UICorner", statsSection)
-
-local labelStats = Instance.new("TextLabel", statsSection)
-labelStats.Size = UDim2.new(1, -20, 1, 0)
-labelStats.Position = UDim2.new(0, 10, 0, 0)
-labelStats.Text = "🍎 Gain: Attente de collecte..."
-labelStats.TextColor3 = Color3.fromRGB(255, 255, 255)
-labelStats.BackgroundTransparency = 1
-labelStats.Font = Enum.Font.GothamBold
-labelStats.TextSize = 14
-labelStats.TextXAlignment = Enum.TextXAlignment.Left
-
---- LOGIQUE COMMUNE (Drag/Sliders) ---
-local function makeDraggable(obj, target)
-    target = target or obj
-    local dragging, dragStart, startPos
-    obj.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true dragStart = input.Position startPos = target.Position
-        end
-    end)
-    obj.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    obj.InputEnded:Connect(function() dragging = false end)
-end
-
-local function setupSlider(back, dot, min, max, isDecimal, callback)
-    local isSliding = false
-    local function update(input)
-        local relPos = math.clamp((input.Position.X - back.AbsolutePosition.X) / back.AbsoluteSize.X, 0, 1)
-        dot.Position = UDim2.new(relPos, -9, 0.5, -9)
-        local val = isDecimal and (min + (relPos * (max - min))) or math.floor(min + (relPos * (max - min)))
-        callback(val)
-    end
-    back.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isSliding = true scroll.ScrollingEnabled = false update(input)
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if isSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            update(input)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function() isSliding = false scroll.ScrollingEnabled = true end)
-end
-
---- CRÉATION DES AUTRES SECTIONS (Auto Farm, Movement, Anti-AFK) ---
--- [Section Auto Farm]
+--- SECTION FARM ---
 local farmSection = Instance.new("Frame", scroll)
 farmSection.Size = UDim2.new(0, 310, 0, 130)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -174,9 +107,9 @@ local labelAF = Instance.new("TextLabel", farmSection)
 labelAF.Size = UDim2.new(0, 150, 0, 30)
 labelAF.Position = UDim2.new(0, 10, 0, 10)
 labelAF.Text = "Auto Farm"
-labelAF.TextColor3 = Color3.new(1,1,1)
 labelAF.Font = Enum.Font.GothamBold
 labelAF.TextSize = 18
+labelAF.TextColor3 = Color3.new(1,1,1)
 labelAF.BackgroundTransparency = 1
 
 local btnAF = Instance.new("TextButton", farmSection)
@@ -206,7 +139,7 @@ dotFS.Position = UDim2.new(0.2, -9, 0.5, -9)
 dotFS.BackgroundColor3 = Color3.fromRGB(150, 255, 150)
 Instance.new("UICorner", dotFS).CornerRadius = UDim.new(1, 0)
 
--- [Section Movement]
+--- SECTION MOVEMENT ---
 local moveSection = Instance.new("Frame", scroll)
 moveSection.Size = UDim2.new(0, 310, 0, 160)
 moveSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -250,16 +183,25 @@ dotJP.Position = UDim2.new(0, 0, 0.5, -9)
 dotJP.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
 Instance.new("UICorner", dotJP).CornerRadius = UDim.new(1, 0)
 
--- [Section Anti-AFK]
+--- SECTION ANTI-AFK ---
 local afkSection = Instance.new("Frame", scroll)
 afkSection.Size = UDim2.new(0, 310, 0, 60)
 afkSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", afkSection)
 
+local labelAA = Instance.new("TextLabel", afkSection)
+labelAA.Size = UDim2.new(0, 150, 0, 30)
+labelAA.Position = UDim2.new(0, 10, 0.5, -15)
+labelAA.Text = "Anti-AFK"
+labelAA.TextColor3 = Color3.new(1, 1, 1)
+labelAA.BackgroundTransparency = 1
+labelAA.Font = Enum.Font.Gotham
+labelAA.TextXAlignment = Enum.TextXAlignment.Left
+
 local btnAA = Instance.new("TextButton", afkSection)
 btnAA.Size = UDim2.new(0, 80, 0, 30)
 btnAA.Position = UDim2.new(1, -90, 0.5, -15)
-btnAA.Text = "Anti-AFK OFF"
+btnAA.Text = "OFF"
 btnAA.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAA.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAA)
@@ -274,15 +216,54 @@ footerVersion.Font = Enum.Font.Gotham
 footerVersion.TextSize = 11
 footerVersion.TextXAlignment = Enum.TextXAlignment.Right
 
--- Activation Drag/Sliders
+-- 4. LOGIQUE DE DRAG ET SLIDERS
+local function makeDraggable(obj, target)
+    target = target or obj
+    local dragging, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true dragStart = input.Position startPos = target.Position
+        end
+    end)
+    obj.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    obj.InputEnded:Connect(function() dragging = false end)
+end
+
+local function setupSlider(back, dot, min, max, isDecimal, callback)
+    local isSliding = false
+    local function update(input)
+        local relPos = math.clamp((input.Position.X - back.AbsolutePosition.X) / back.AbsoluteSize.X, 0, 1)
+        dot.Position = UDim2.new(relPos, -9, 0.5, -9)
+        local val = isDecimal and (min + (relPos * (max - min))) or math.floor(min + (relPos * (max - min)))
+        callback(val)
+    end
+    back.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isSliding = true scroll.ScrollingEnabled = false update(input)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if isSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function() isSliding = false scroll.ScrollingEnabled = true end)
+end
+
 makeDraggable(logo)
 makeDraggable(frame)
 makeDraggable(header, frame)
+
 setupSlider(sliderBackFS, dotFS, 0.01, 5, true, function(v) farmWaitTime = v labelFS.Text = string.format("Farm Speed: %.2fs", v) end)
 setupSlider(sliderWS, dotWS, 16, 250, false, function(v) walkSpeedValue = v labelWS.Text = "WalkSpeed: "..v end)
 setupSlider(sliderJP, dotJP, 50, 350, false, function(v) jumpPowerValue = v labelJP.Text = "JumpPower: "..v end)
 
--- 4. BOUTONS & CYCLES
+-- 5. LOGIQUE DES BOUTONS
 logo.MouseButton1Up:Connect(function() frame.Visible = not frame.Visible end)
 close.MouseButton1Click:Connect(function() frame.Visible = false end)
 
@@ -294,41 +275,11 @@ end)
 
 btnAA.MouseButton1Click:Connect(function()
     antiAfkActive = not antiAfkActive
-    btnAA.Text = antiAfkActive and "Anti-AFK ON" or "Anti-AFK OFF"
+    btnAA.Text = antiAfkActive and "ON" or "OFF"
     btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(80, 80, 80)
 end)
 
--- BOUCLE STATISTIQUE (Utilise ton EternityNum/AppleCollects)
-task.spawn(function()
-    while true do
-        local appleObj = getAppleValue()
-        if appleObj then
-            local currentVal = appleObj.Value
-            table.insert(appleHistory, {tick(), currentVal})
-            
-            -- Nettoyage des données de plus de 60s
-            for i = #appleHistory, 1, -1 do
-                if tick() - appleHistory[i][1] > 60 then
-                    table.remove(appleHistory, i)
-                end
-            end
-            
-            if #appleHistory > 1 then
-                local diff = appleHistory[#appleHistory][2] - appleHistory[1][2]
-                -- On essaye de formater le gain si le module EternityNum est accessible
-                local formattedGain = diff
-                pcall(function()
-                    local v1 = require(game.ReplicatedStorage.Modules.EternityNum)
-                    formattedGain = v1.short(diff, 2)
-                end)
-                labelStats.Text = "🍎 Gain: " .. formattedGain .. " pommes / min"
-            end
-        end
-        task.wait(1)
-    end
-end)
-
--- BOUCLE DE FARM & PERSO
+-- BOUCLE DE FARM & PERSONNAGE
 RunService.Stepped:Connect(function()
     pcall(function()
         local hum = player.Character.Humanoid
