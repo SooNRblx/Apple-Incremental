@@ -15,6 +15,7 @@ local antiAfkActive = false
 local currentTPIndex = 1
 local walkSpeedValue = 16
 local jumpPowerValue = 50
+local farmWaitTime = 1.0 -- Valeur par défaut (1 seconde)
 
 local locations = {
     Vector3.new(16.294, 2, 8.095), Vector3.new(26.887, 2, 32.912), Vector3.new(28.422, 2, 6.238),
@@ -35,27 +36,21 @@ local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.Name = "AppleAutoFarmGui"
 screenGui.ResetOnSpawn = false
 
--- Bouton Logo Déplaçable
 local logo = Instance.new("TextButton", screenGui)
-logo.Name = "DraggableLogo"
 logo.Size = UDim2.new(0, 60, 0, 60)
 logo.Position = UDim2.new(0, 20, 0, 150)
 logo.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 logo.Text = "🍎"
 logo.TextSize = 35
-logo.AutoButtonColor = false
 Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
--- Fenêtre principale
 local frame = Instance.new("Frame", screenGui)
-frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 350, 0, 280)
-frame.Position = UDim2.new(0.5, -175, 0.5, -140)
+frame.Size = UDim2.new(0, 350, 0, 300)
+frame.Position = UDim2.new(0.5, -175, 0.5, -150)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
--- Header
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -89,28 +84,27 @@ close.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 close.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", close)
 
--- Scroll Frame
 local scroll = Instance.new("ScrollingFrame", frame)
 scroll.Size = UDim2.new(1, -10, 1, -85)
 scroll.Position = UDim2.new(0, 5, 0, 45)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
-scroll.CanvasSize = UDim2.new(0, 0, 0, 400)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 480)
 scroll.ScrollBarThickness = 2
 
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTIONS (Farm, Movement, AFK) ---
+--- SECTION FARM (Avec Speed Slider) ---
 local farmSection = Instance.new("Frame", scroll)
-farmSection.Size = UDim2.new(0, 310, 0, 80)
+farmSection.Size = UDim2.new(0, 310, 0, 140)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", farmSection)
 
 local labelAF = Instance.new("TextLabel", farmSection)
 labelAF.Size = UDim2.new(0, 150, 0, 30)
-labelAF.Position = UDim2.new(0, 10, 0.5, -15)
+labelAF.Position = UDim2.new(0, 10, 0, 10)
 labelAF.Text = "Auto Farm"
 labelAF.TextColor3 = Color3.new(1, 1, 1)
 labelAF.BackgroundTransparency = 1
@@ -119,18 +113,42 @@ labelAF.TextSize = 18
 labelAF.TextXAlignment = Enum.TextXAlignment.Left
 
 local btnAF = Instance.new("TextButton", farmSection)
-btnAF.Size = UDim2.new(0, 80, 0, 35)
-btnAF.Position = UDim2.new(1, -90, 0.5, -17)
+btnAF.Size = UDim2.new(0, 80, 0, 30)
+btnAF.Position = UDim2.new(1, -90, 0, 10)
 btnAF.Text = "OFF"
 btnAF.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAF.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAF)
 
+local labelFS = Instance.new("TextLabel", farmSection)
+labelFS.Size = UDim2.new(0, 200, 0, 20)
+labelFS.Position = UDim2.new(0, 10, 0, 60)
+labelFS.Text = "Farm Speed: 1.00s"
+labelFS.TextColor3 = Color3.fromRGB(200, 200, 200)
+labelFS.BackgroundTransparency = 1
+labelFS.Font = Enum.Font.Gotham
+labelFS.TextSize = 14
+labelFS.TextXAlignment = Enum.TextXAlignment.Left
+
+local sliderBackFS = Instance.new("Frame", farmSection)
+sliderBackFS.Size = UDim2.new(0, 260, 0, 6)
+sliderBackFS.Position = UDim2.new(0.5, -130, 0, 100)
+sliderBackFS.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", sliderBackFS)
+
+local dotFS = Instance.new("Frame", sliderBackFS)
+dotFS.Size = UDim2.new(0, 18, 0, 18)
+dotFS.Position = UDim2.new(0.2, -9, 0.5, -9) -- Position par défaut vers 1s
+dotFS.BackgroundColor3 = Color3.fromRGB(150, 255, 150)
+Instance.new("UICorner", dotFS).CornerRadius = UDim.new(1, 0)
+
+--- SECTION MOVEMENT ---
 local moveSection = Instance.new("Frame", scroll)
 moveSection.Size = UDim2.new(0, 310, 0, 160)
 moveSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", moveSection)
 
+-- WS Slider
 local labelWS = Instance.new("TextLabel", moveSection)
 labelWS.Size = UDim2.new(0, 200, 0, 20)
 labelWS.Position = UDim2.new(0, 10, 0, 20)
@@ -139,17 +157,18 @@ labelWS.TextColor3 = Color3.new(1, 1, 1)
 labelWS.BackgroundTransparency = 1
 
 local sliderWS = Instance.new("Frame", moveSection)
-sliderWS.Size = UDim2.new(0, 260, 0, 8)
+sliderWS.Size = UDim2.new(0, 260, 0, 6)
 sliderWS.Position = UDim2.new(0.5, -130, 0, 50)
 sliderWS.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Instance.new("UICorner", sliderWS)
 
 local dotWS = Instance.new("Frame", sliderWS)
-dotWS.Size = UDim2.new(0, 20, 0, 20)
-dotWS.Position = UDim2.new(0, 0, 0.5, -10)
+dotWS.Size = UDim2.new(0, 18, 0, 18)
+dotWS.Position = UDim2.new(0, 0, 0.5, -9)
 dotWS.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
 Instance.new("UICorner", dotWS).CornerRadius = UDim.new(1, 0)
 
+-- JP Slider
 local labelJP = Instance.new("TextLabel", moveSection)
 labelJP.Size = UDim2.new(0, 200, 0, 20)
 labelJP.Position = UDim2.new(0, 10, 0, 90)
@@ -158,17 +177,18 @@ labelJP.TextColor3 = Color3.new(1, 1, 1)
 labelJP.BackgroundTransparency = 1
 
 local sliderJP = Instance.new("Frame", moveSection)
-sliderJP.Size = UDim2.new(0, 260, 0, 8)
+sliderJP.Size = UDim2.new(0, 260, 0, 6)
 sliderJP.Position = UDim2.new(0.5, -130, 0, 120)
 sliderJP.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Instance.new("UICorner", sliderJP)
 
 local dotJP = Instance.new("Frame", sliderJP)
-dotJP.Size = UDim2.new(0, 20, 0, 20)
-dotJP.Position = UDim2.new(0, 0, 0.5, -10)
+dotJP.Size = UDim2.new(0, 18, 0, 18)
+dotJP.Position = UDim2.new(0, 0, 0.5, -9)
 dotJP.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
 Instance.new("UICorner", dotJP).CornerRadius = UDim.new(1, 0)
 
+--- SECTION ANTI-AFK ---
 local afkSection = Instance.new("Frame", scroll)
 afkSection.Size = UDim2.new(0, 310, 0, 60)
 afkSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -184,14 +204,13 @@ labelAA.Font = Enum.Font.Gotham
 labelAA.TextXAlignment = Enum.TextXAlignment.Left
 
 local btnAA = Instance.new("TextButton", afkSection)
-btnAA.Size = UDim2.new(0, 80, 0, 35)
-btnAA.Position = UDim2.new(1, -90, 0.5, -17)
+btnAA.Size = UDim2.new(0, 80, 0, 30)
+btnAA.Position = UDim2.new(1, -90, 0.5, -15)
 btnAA.Text = "OFF"
 btnAA.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAA.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAA)
 
--- Version Footer
 local footerVersion = Instance.new("TextLabel", frame)
 footerVersion.Size = UDim2.new(0, 120, 0, 20)
 footerVersion.Position = UDim2.new(1, -130, 1, -25)
@@ -202,15 +221,13 @@ footerVersion.Font = Enum.Font.Gotham
 footerVersion.TextSize = 11
 footerVersion.TextXAlignment = Enum.TextXAlignment.Right
 
--- 4. LOGIQUE DE DRAG AMÉLIORÉE (Logo + Fenêtre Entière)
+-- 4. DRAG LOGIC (FENÊTRE COMPLÈTE)
 local function makeDraggable(obj, target)
     target = target or obj
     local dragging, dragStart, startPos
     obj.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = target.Position
+            dragging = true dragStart = input.Position startPos = target.Position
         end
     end)
     obj.InputChanged:Connect(function(input)
@@ -219,26 +236,22 @@ local function makeDraggable(obj, target)
             target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
-    obj.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
+    obj.InputEnded:Connect(function(input) dragging = false end)
 end
 
--- On rend le logo déplaçable
 makeDraggable(logo)
--- On rend TOUTE LA FENÊTRE déplaçable en cliquant sur le fond (Frame) ou sur le Header
 makeDraggable(frame)
 makeDraggable(header, frame)
 
--- 5. LOGIQUE DES SLIDERS
-local function setupSlider(back, dot, min, max, callback)
+-- 5. SLIDERS LOGIC
+local function setupSlider(back, dot, min, max, isDecimal, callback)
     local isSliding = false
     local function update(input)
         local relPos = math.clamp((input.Position.X - back.AbsolutePosition.X) / back.AbsoluteSize.X, 0, 1)
-        dot.Position = UDim2.new(relPos, -10, 0.5, -10)
-        callback(math.floor(min + (relPos * (max - min))))
+        dot.Position = UDim2.new(relPos, -9, 0.5, -9)
+        local val = min + (relPos * (max - min))
+        if not isDecimal then val = math.floor(val) end
+        callback(val)
     end
     back.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -250,22 +263,21 @@ local function setupSlider(back, dot, min, max, callback)
             update(input)
         end
     end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isSliding = false scroll.ScrollingEnabled = true
-        end
-    end)
+    UserInputService.InputEnded:Connect(function() isSliding = false scroll.ScrollingEnabled = true end)
 end
 
-setupSlider(sliderWS, dotWS, 16, 250, function(v) walkSpeedValue = v labelWS.Text = "WalkSpeed: "..v end)
-setupSlider(sliderJP, dotJP, 50, 350, function(v) jumpPowerValue = v labelJP.Text = "JumpPower: "..v end)
+-- Sliders Setup
+setupSlider(sliderBackFS, dotFS, 0.01, 5, true, function(v) 
+    farmWaitTime = v 
+    labelFS.Text = string.format("Farm Speed: %.2fs", v) 
+end)
+setupSlider(sliderWS, dotWS, 16, 250, false, function(v) walkSpeedValue = v labelWS.Text = "WalkSpeed: "..v end)
+setupSlider(sliderJP, dotJP, 50, 350, false, function(v) jumpPowerValue = v labelJP.Text = "JumpPower: "..v end)
 
--- 6. FONCTIONS ET CYCLES
+-- 6. FONCTIONNEMENT
 local lastLogoPos = logo.Position
 logo.MouseButton1Up:Connect(function()
-    if (logo.Position.X.Offset - lastLogoPos.X.Offset) == 0 then
-        frame.Visible = not frame.Visible
-    end
+    if (logo.Position.X.Offset - lastLogoPos.X.Offset) == 0 then frame.Visible = not frame.Visible end
     lastLogoPos = logo.Position
 end)
 
@@ -299,14 +311,12 @@ task.spawn(function()
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(locations[currentTPIndex])
                 currentTPIndex = (currentTPIndex % #locations) + 1
             end)
-            task.wait(0.05)
-        else task.wait(0.1) end
+            task.wait(farmWaitTime) -- Utilise la valeur du slider
+        else task.wait(0.5) end
     end
 end)
 
 local vu = game:GetService("VirtualUser")
 player.Idled:Connect(function()
-    if antiAfkActive then
-        pcall(function() vu:CaptureController() vu:ClickButton2(Vector2.new()) end)
-    end
+    if antiAfkActive then pcall(function() vu:CaptureController() vu:ClickButton2(Vector2.new()) end) end
 end)
