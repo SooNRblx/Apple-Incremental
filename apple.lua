@@ -97,39 +97,56 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTION FARM ---
+--- SECTION FARM RÉORGANISÉE ---
 local farmSection = Instance.new("Frame", scroll)
-farmSection.Size = UDim2.new(0, 310, 0, 130)
+farmSection.Size = UDim2.new(0, 310, 0, 140)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", farmSection)
 
+-- Titre de la section (Gras, en haut à gauche)
+local secTitle = Instance.new("TextLabel", farmSection)
+secTitle.Size = UDim2.new(0, 100, 0, 25)
+secTitle.Position = UDim2.new(0, 10, 0, 5)
+secTitle.Text = "Farm"
+secTitle.Font = Enum.Font.GothamBold
+secTitle.TextSize = 12
+secTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+secTitle.BackgroundTransparency = 1
+secTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Libellé Auto Farm (Normal, collé à gauche)
 local labelAF = Instance.new("TextLabel", farmSection)
 labelAF.Size = UDim2.new(0, 150, 0, 30)
-labelAF.Position = UDim2.new(0, 10, 0, 10)
+labelAF.Position = UDim2.new(0, 10, 0, 35) -- Juste en dessous du titre "Farm"
 labelAF.Text = "Auto Farm"
-labelAF.Font = Enum.Font.GothamBold
-labelAF.TextSize = 18
-labelAF.TextColor3 = Color3.new(1,1,1)
+labelAF.Font = Enum.Font.Gotham -- Pas de gras
+labelAF.TextSize = 16
+labelAF.TextColor3 = Color3.new(1, 1, 1)
 labelAF.BackgroundTransparency = 1
+labelAF.TextXAlignment = Enum.TextXAlignment.Left
 
 local btnAF = Instance.new("TextButton", farmSection)
 btnAF.Size = UDim2.new(0, 80, 0, 30)
-btnAF.Position = UDim2.new(1, -90, 0, 10)
+btnAF.Position = UDim2.new(1, -90, 0, 35)
 btnAF.Text = "OFF"
 btnAF.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAF.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAF)
 
+-- Slider Speed
 local labelFS = Instance.new("TextLabel", farmSection)
 labelFS.Size = UDim2.new(0, 200, 0, 20)
-labelFS.Position = UDim2.new(0, 10, 0, 50)
+labelFS.Position = UDim2.new(0, 10, 0, 75)
 labelFS.Text = "Farm Speed: 1.00s"
+labelFS.Font = Enum.Font.Gotham
+labelFS.TextSize = 13
 labelFS.TextColor3 = Color3.fromRGB(200, 200, 200)
 labelFS.BackgroundTransparency = 1
+labelFS.TextXAlignment = Enum.TextXAlignment.Left
 
 local sliderBackFS = Instance.new("Frame", farmSection)
 sliderBackFS.Size = UDim2.new(0, 260, 0, 6)
-sliderBackFS.Position = UDim2.new(0.5, -130, 0, 90)
+sliderBackFS.Position = UDim2.new(0.5, -130, 0, 110)
 sliderBackFS.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Instance.new("UICorner", sliderBackFS)
 
