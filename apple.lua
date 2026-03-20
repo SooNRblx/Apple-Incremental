@@ -18,16 +18,19 @@ local jumpPowerValue = 50
 local farmWaitTime = 1.0
 
 -- Variables pour les stats
-local applesPerMinute = 0
-local appleHistory = {} -- Stocke les pommes gagnées sur les 60 dernières secondes
+local appleHistory = {}
 
--- Tentative de trouver la valeur des pommes (à adapter selon le jeu)
+-- FONCTION DE RECHERCHE DANS HIDERSTATS
 local function getAppleValue()
-    local stats = player:FindFirstChild("leaderstats")
-    if stats then
-        return stats:FindFirstChild("Apples") or stats:FindFirstChild("Pommes") or stats:FindFirstChild("Apple")
+    -- On cherche d'abord dans un dossier nommé "HiderStats"
+    local hider = player:FindFirstChild("HiderStats") or player:FindFirstChild("PlayerStats") or player:FindFirstChild("Stats")
+    
+    if hider then
+        return hider:FindFirstChild("Apples") or hider:FindFirstChild("Pommes") or hider:FindFirstChild("Apple")
     end
-    return nil
+    
+    -- Si on ne trouve toujours pas, on cherche PARTOUT dans le joueur une valeur qui s'appelle "Apples"
+    return player:FindFirstChild("Apples", true) 
 end
 
 local locations = {
@@ -44,7 +47,7 @@ local locations = {
     Vector3.new(31.892, 2, 0.095), Vector3.new(22.716, 2, 40.894)
 }
 
--- 3. INTERFACE
+-- 3. INTERFACE (AppleAutoFarmGui)
 local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.Name = "AppleAutoFarmGui"
 screenGui.ResetOnSpawn = false
@@ -58,13 +61,13 @@ logo.TextSize = 35
 Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 350, 0, 320) -- Agrandie pour les stats
+frame.Size = UDim2.new(0, 350, 0, 320)
 frame.Position = UDim2.new(0.5, -175, 0.5, -160)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
--- Header & Crédits
+-- Header
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -110,23 +113,23 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTION STATS (NOUVEAU) ---
+--- SECTION STATS ---
 local statsSection = Instance.new("Frame", scroll)
 statsSection.Size = UDim2.new(0, 310, 0, 50)
-statsSection.BackgroundColor3 = Color3.fromRGB(45, 45, 20) -- Légère teinte jaune
+statsSection.BackgroundColor3 = Color3.fromRGB(45, 45, 20)
 Instance.new("UICorner", statsSection)
 
 local labelStats = Instance.new("TextLabel", statsSection)
 labelStats.Size = UDim2.new(1, -20, 1, 0)
 labelStats.Position = UDim2.new(0, 10, 0, 0)
-labelStats.Text = "🍎 Gain: 0 pommes / min"
+labelStats.Text = "🍎 Gain: Calcul en cours..."
 labelStats.TextColor3 = Color3.fromRGB(255, 255, 255)
 labelStats.BackgroundTransparency = 1
 labelStats.Font = Enum.Font.GothamBold
 labelStats.TextSize = 15
 labelStats.TextXAlignment = Enum.TextXAlignment.Left
 
---- SECTION FARM (Avec Speed Slider) ---
+--- SECTION FARM ---
 local farmSection = Instance.new("Frame", scroll)
 farmSection.Size = UDim2.new(0, 310, 0, 130)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -136,11 +139,10 @@ local labelAF = Instance.new("TextLabel", farmSection)
 labelAF.Size = UDim2.new(0, 150, 0, 30)
 labelAF.Position = UDim2.new(0, 10, 0, 10)
 labelAF.Text = "Auto Farm"
-labelAF.TextColor3 = Color3.new(1, 1, 1)
-labelAF.BackgroundTransparency = 1
 labelAF.Font = Enum.Font.GothamBold
 labelAF.TextSize = 18
-labelAF.TextXAlignment = Enum.TextXAlignment.Left
+labelAF.TextColor3 = Color3.new(1,1,1)
+labelAF.BackgroundTransparency = 1
 
 local btnAF = Instance.new("TextButton", farmSection)
 btnAF.Size = UDim2.new(0, 80, 0, 30)
@@ -156,8 +158,6 @@ labelFS.Position = UDim2.new(0, 10, 0, 50)
 labelFS.Text = "Farm Speed: 1.00s"
 labelFS.TextColor3 = Color3.fromRGB(200, 200, 200)
 labelFS.BackgroundTransparency = 1
-labelFS.Font = Enum.Font.Gotham
-labelFS.TextXAlignment = Enum.TextXAlignment.Left
 
 local sliderBackFS = Instance.new("Frame", farmSection)
 sliderBackFS.Size = UDim2.new(0, 260, 0, 6)
@@ -171,8 +171,7 @@ dotFS.Position = UDim2.new(0.2, -9, 0.5, -9)
 dotFS.BackgroundColor3 = Color3.fromRGB(150, 255, 150)
 Instance.new("UICorner", dotFS).CornerRadius = UDim.new(1, 0)
 
---- SECTION MOVEMENT & ANTI-AFK ---
--- (Inchangé pour garder la structure compacte)
+--- SECTION MOVEMENT ---
 local moveSection = Instance.new("Frame", scroll)
 moveSection.Size = UDim2.new(0, 310, 0, 160)
 moveSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -182,7 +181,7 @@ local labelWS = Instance.new("TextLabel", moveSection)
 labelWS.Size = UDim2.new(0, 200, 0, 20)
 labelWS.Position = UDim2.new(0, 10, 0, 20)
 labelWS.Text = "WalkSpeed: 16"
-labelWS.TextColor3 = Color3.new(1, 1, 1)
+labelWS.TextColor3 = Color3.new(1,1,1)
 labelWS.BackgroundTransparency = 1
 
 local sliderWS = Instance.new("Frame", moveSection)
@@ -201,7 +200,7 @@ local labelJP = Instance.new("TextLabel", moveSection)
 labelJP.Size = UDim2.new(0, 200, 0, 20)
 labelJP.Position = UDim2.new(0, 10, 0, 90)
 labelJP.Text = "JumpPower: 50"
-labelJP.TextColor3 = Color3.new(1, 1, 1)
+labelJP.TextColor3 = Color3.new(1,1,1)
 labelJP.BackgroundTransparency = 1
 
 local sliderJP = Instance.new("Frame", moveSection)
@@ -216,6 +215,7 @@ dotJP.Position = UDim2.new(0, 0, 0.5, -9)
 dotJP.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
 Instance.new("UICorner", dotJP).CornerRadius = UDim.new(1, 0)
 
+--- SECTION ANTI-AFK ---
 local afkSection = Instance.new("Frame", scroll)
 afkSection.Size = UDim2.new(0, 310, 0, 60)
 afkSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -248,7 +248,7 @@ footerVersion.Font = Enum.Font.Gotham
 footerVersion.TextSize = 11
 footerVersion.TextXAlignment = Enum.TextXAlignment.Right
 
--- 4. LOGIQUE DE DRAG & SLIDERS (Fonctions regroupées)
+-- 4. LOGIQUE DE DRAG ET SLIDERS
 local function makeDraggable(obj, target)
     target = target or obj
     local dragging, dragStart, startPos
@@ -295,7 +295,7 @@ setupSlider(sliderBackFS, dotFS, 0.01, 5, true, function(v) farmWaitTime = v lab
 setupSlider(sliderWS, dotWS, 16, 250, false, function(v) walkSpeedValue = v labelWS.Text = "WalkSpeed: "..v end)
 setupSlider(sliderJP, dotJP, 50, 350, false, function(v) jumpPowerValue = v labelJP.Text = "JumpPower: "..v end)
 
--- 5. LOGIQUE DES BOUTONS & CYCLES
+-- 5. LOGIQUE DES BOUTONS
 logo.MouseButton1Up:Connect(function() frame.Visible = not frame.Visible end)
 close.MouseButton1Click:Connect(function() frame.Visible = false end)
 
@@ -311,31 +311,31 @@ btnAA.MouseButton1Click:Connect(function()
     btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(80, 80, 80)
 end)
 
--- Boucle Statistique (Calcul des pommes/min)
+-- BOUCLE STATISTIQUE (Pommes/min)
 task.spawn(function()
     while true do
-        local val = getAppleValue()
-        if val then
-            table.insert(appleHistory, {tick(), val.Value})
-            -- Nettoyage des anciennes données (> 60s)
+        local appleObj = getAppleValue()
+        if appleObj and appleObj:IsA("ValueBase") then
+            table.insert(appleHistory, {tick(), appleObj.Value})
+            
             for i = #appleHistory, 1, -1 do
                 if tick() - appleHistory[i][1] > 60 then
                     table.remove(appleHistory, i)
                 end
             end
-            -- Calcul de la différence
+            
             if #appleHistory > 1 then
                 local diff = appleHistory[#appleHistory][2] - appleHistory[1][2]
                 labelStats.Text = "🍎 Gain: " .. diff .. " pommes / min"
             end
         else
-            labelStats.Text = "🍎 En attente de données..."
+            labelStats.Text = "🍎 En attente de HiderStats..."
         end
         task.wait(1)
     end
 end)
 
--- Boucles Farm & Personnage
+-- BOUCLE DE FARM & PERSONNAGE
 RunService.Stepped:Connect(function()
     pcall(function()
         local hum = player.Character.Humanoid
