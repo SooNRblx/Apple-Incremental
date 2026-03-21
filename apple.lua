@@ -45,8 +45,8 @@ logo.TextSize = 35
 Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 350, 0, 280)
-frame.Position = UDim2.new(0.5, -175, 0.5, -140)
+frame.Size = UDim2.new(0, 350, 0, 300)
+frame.Position = UDim2.new(0.5, -175, 0.5, -150)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.Visible = false
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
@@ -90,36 +90,34 @@ scroll.Size = UDim2.new(1, -10, 1, -85)
 scroll.Position = UDim2.new(0, 5, 0, 45)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
-scroll.CanvasSize = UDim2.new(0, 0, 0, 450)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 500)
 scroll.ScrollBarThickness = 2
 
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
---- SECTION FARM RÉORGANISÉE ---
+--- SECTION FARM ---
 local farmSection = Instance.new("Frame", scroll)
 farmSection.Size = UDim2.new(0, 310, 0, 140)
 farmSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", farmSection)
 
--- Titre de la section (Gras, en haut à gauche)
-local secTitle = Instance.new("TextLabel", farmSection)
-secTitle.Size = UDim2.new(0, 100, 0, 25)
-secTitle.Position = UDim2.new(0, 10, 0, 5)
-secTitle.Text = "Farm"
-secTitle.Font = Enum.Font.GothamBold
-secTitle.TextSize = 12
-secTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
-secTitle.BackgroundTransparency = 1
-secTitle.TextXAlignment = Enum.TextXAlignment.Left
+local secTitleFarm = Instance.new("TextLabel", farmSection)
+secTitleFarm.Size = UDim2.new(0, 100, 0, 25)
+secTitleFarm.Position = UDim2.new(0, 10, 0, 5)
+secTitleFarm.Text = "Farm"
+secTitleFarm.Font = Enum.Font.GothamBold
+secTitleFarm.TextSize = 12
+secTitleFarm.TextColor3 = Color3.fromRGB(180, 180, 180)
+secTitleFarm.BackgroundTransparency = 1
+secTitleFarm.TextXAlignment = Enum.TextXAlignment.Left
 
--- Libellé Auto Farm (Normal, collé à gauche)
 local labelAF = Instance.new("TextLabel", farmSection)
 labelAF.Size = UDim2.new(0, 150, 0, 30)
-labelAF.Position = UDim2.new(0, 10, 0, 35) -- Juste en dessous du titre "Farm"
+labelAF.Position = UDim2.new(0, 10, 0, 35)
 labelAF.Text = "Auto Farm"
-labelAF.Font = Enum.Font.Gotham -- Pas de gras
+labelAF.Font = Enum.Font.Gotham
 labelAF.TextSize = 16
 labelAF.TextColor3 = Color3.new(1, 1, 1)
 labelAF.BackgroundTransparency = 1
@@ -133,7 +131,6 @@ btnAF.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAF.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", btnAF)
 
--- Slider Speed
 local labelFS = Instance.new("TextLabel", farmSection)
 labelFS.Size = UDim2.new(0, 200, 0, 20)
 labelFS.Position = UDim2.new(0, 10, 0, 75)
@@ -158,20 +155,34 @@ Instance.new("UICorner", dotFS).CornerRadius = UDim.new(1, 0)
 
 --- SECTION MOVEMENT ---
 local moveSection = Instance.new("Frame", scroll)
-moveSection.Size = UDim2.new(0, 310, 0, 160)
+moveSection.Size = UDim2.new(0, 310, 0, 180)
 moveSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", moveSection)
 
+local secTitleMove = Instance.new("TextLabel", moveSection)
+secTitleMove.Size = UDim2.new(0, 100, 0, 25)
+secTitleMove.Position = UDim2.new(0, 10, 0, 5)
+secTitleMove.Text = "Movement"
+secTitleMove.Font = Enum.Font.GothamBold
+secTitleMove.TextSize = 12
+secTitleMove.TextColor3 = Color3.fromRGB(180, 180, 180)
+secTitleMove.BackgroundTransparency = 1
+secTitleMove.TextXAlignment = Enum.TextXAlignment.Left
+
+-- WalkSpeed
 local labelWS = Instance.new("TextLabel", moveSection)
 labelWS.Size = UDim2.new(0, 200, 0, 20)
-labelWS.Position = UDim2.new(0, 10, 0, 20)
+labelWS.Position = UDim2.new(0, 10, 0, 35)
 labelWS.Text = "WalkSpeed: 16"
+labelWS.Font = Enum.Font.Gotham
+labelWS.TextSize = 15
 labelWS.TextColor3 = Color3.new(1,1,1)
 labelWS.BackgroundTransparency = 1
+labelWS.TextXAlignment = Enum.TextXAlignment.Left
 
 local sliderWS = Instance.new("Frame", moveSection)
 sliderWS.Size = UDim2.new(0, 260, 0, 6)
-sliderWS.Position = UDim2.new(0.5, -130, 0, 50)
+sliderWS.Position = UDim2.new(0.5, -130, 0, 65)
 sliderWS.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Instance.new("UICorner", sliderWS)
 
@@ -181,16 +192,20 @@ dotWS.Position = UDim2.new(0, 0, 0.5, -9)
 dotWS.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
 Instance.new("UICorner", dotWS).CornerRadius = UDim.new(1, 0)
 
+-- JumpPower
 local labelJP = Instance.new("TextLabel", moveSection)
 labelJP.Size = UDim2.new(0, 200, 0, 20)
-labelJP.Position = UDim2.new(0, 10, 0, 90)
+labelJP.Position = UDim2.new(0, 10, 0, 105)
 labelJP.Text = "JumpPower: 50"
+labelJP.Font = Enum.Font.Gotham
+labelJP.TextSize = 15
 labelJP.TextColor3 = Color3.new(1,1,1)
 labelJP.BackgroundTransparency = 1
+labelJP.TextXAlignment = Enum.TextXAlignment.Left
 
 local sliderJP = Instance.new("Frame", moveSection)
 sliderJP.Size = UDim2.new(0, 260, 0, 6)
-sliderJP.Position = UDim2.new(0.5, -130, 0, 120)
+sliderJP.Position = UDim2.new(0.5, -130, 0, 135)
 sliderJP.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Instance.new("UICorner", sliderJP)
 
@@ -200,24 +215,35 @@ dotJP.Position = UDim2.new(0, 0, 0.5, -9)
 dotJP.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
 Instance.new("UICorner", dotJP).CornerRadius = UDim.new(1, 0)
 
---- SECTION ANTI-AFK ---
-local afkSection = Instance.new("Frame", scroll)
-afkSection.Size = UDim2.new(0, 310, 0, 60)
-afkSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Instance.new("UICorner", afkSection)
+--- SECTION MISC ---
+local miscSection = Instance.new("Frame", scroll)
+miscSection.Size = UDim2.new(0, 310, 0, 80)
+miscSection.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", miscSection)
 
-local labelAA = Instance.new("TextLabel", afkSection)
+local secTitleMisc = Instance.new("TextLabel", miscSection)
+secTitleMisc.Size = UDim2.new(0, 100, 0, 25)
+secTitleMisc.Position = UDim2.new(0, 10, 0, 5)
+secTitleMisc.Text = "Misc"
+secTitleMisc.Font = Enum.Font.GothamBold
+secTitleMisc.TextSize = 12
+secTitleMisc.TextColor3 = Color3.fromRGB(180, 180, 180)
+secTitleMisc.BackgroundTransparency = 1
+secTitleMisc.TextXAlignment = Enum.TextXAlignment.Left
+
+local labelAA = Instance.new("TextLabel", miscSection)
 labelAA.Size = UDim2.new(0, 150, 0, 30)
-labelAA.Position = UDim2.new(0, 10, 0.5, -15)
+labelAA.Position = UDim2.new(0, 10, 0, 35)
 labelAA.Text = "Anti-AFK"
 labelAA.TextColor3 = Color3.new(1, 1, 1)
 labelAA.BackgroundTransparency = 1
 labelAA.Font = Enum.Font.Gotham
+labelAA.TextSize = 16
 labelAA.TextXAlignment = Enum.TextXAlignment.Left
 
-local btnAA = Instance.new("TextButton", afkSection)
+local btnAA = Instance.new("TextButton", miscSection)
 btnAA.Size = UDim2.new(0, 80, 0, 30)
-btnAA.Position = UDim2.new(1, -90, 0.5, -15)
+btnAA.Position = UDim2.new(1, -90, 0, 35)
 btnAA.Text = "OFF"
 btnAA.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnAA.TextColor3 = Color3.new(1, 1, 1)
@@ -226,7 +252,7 @@ Instance.new("UICorner", btnAA)
 local footerVersion = Instance.new("TextLabel", frame)
 footerVersion.Size = UDim2.new(0, 120, 0, 20)
 footerVersion.Position = UDim2.new(1, -130, 1, -25)
-footerVersion.Text = "v1 (More soon)"
+footerVersion.Text = "v1 (Design Update)"
 footerVersion.TextColor3 = Color3.fromRGB(120, 120, 120)
 footerVersion.BackgroundTransparency = 1
 footerVersion.Font = Enum.Font.Gotham
@@ -296,7 +322,7 @@ btnAA.MouseButton1Click:Connect(function()
     btnAA.BackgroundColor3 = antiAfkActive and Color3.fromRGB(40, 160, 40) or Color3.fromRGB(80, 80, 80)
 end)
 
--- BOUCLE DE FARM & PERSONNAGE
+-- BOUCLES
 RunService.Stepped:Connect(function()
     pcall(function()
         local hum = player.Character.Humanoid
